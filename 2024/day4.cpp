@@ -1,7 +1,6 @@
 #include <iostream>
 #include <sstream>
 #include <vector>
-#include <algorithm>
 using namespace std;
 
 vector<vector<char>> getVector() {
@@ -22,13 +21,11 @@ vector<vector<char>> getVector() {
     return vec;
 }
 
-int main() {
+int xmasNum(const vector<vector<char>> &vecList) {
     int res = 0;
 
     string xmas = "XMAS";
     string xmasRev = "SAMX";
-
-    vector<vector<char>> vecList = getVector();
 
     for (int i = 0; i < vecList.size(); i++) {
         for (int j = 0; j < vecList[i].size(); j++) {
@@ -67,7 +64,40 @@ int main() {
         }
     }
 
-    cout << "XMAS score is: " << res << endl;
+    return res;
+}
+
+int masNum(const vector<vector<char>> &vecList) {
+    int res = 0;
+
+    string ms = "MS";
+    string msRev = "SM";
+
+    for (int i = 0; i < vecList.size(); i++) {
+        for (int j = 0; j < vecList[i].size(); j++) {
+            if (vecList[i][j] != 'A') {
+                continue;
+            }
+
+            if (j + 1 < vecList[i].size() && j - 1 >= 0 && i + 1 < vecList.size() && i - 1 >= 0) {
+                string left = string(1, vecList[i - 1][j - 1]) + string(1, vecList[i + 1][j + 1]);
+                string right = string(1, vecList[i - 1][j + 1]) + string(1, vecList[i + 1][j - 1]);
+                res += (left == ms || left == msRev) && (right == ms || right == msRev);
+            }
+        }
+    }
+
+    return res;
+}
+
+int main() {
+
+    vector<vector<char>> vecList = getVector();
+
+    int res = xmasNum(vecList);
+    int masRes = masNum(vecList);
+
+    cout << "X-MAS score is: " << masRes << endl;
 
     return 0;
 }
