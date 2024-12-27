@@ -54,17 +54,57 @@ vector<vector<int>> getUpdateVector() {
     return vec;
 }
 
-int getUpdateNum(const map<int, vector<int>> &ruleDict, const vector<vector<int>> &updateVec) {
+int reorderIncUpdate(const map<int, vector<int>> &ruleDict, const vector<int> &updateVec) {
+    map<int, int> updateDict;
+    vector<int> corVec;
+
+    for (int i = 0; i < updateVec.size(); i++) {
+        updateDict.insert({updateVec[i], i});
+    }
+
+    for (int i = 0; i < updateVec.size(); i++) {
+        if (ruleDict.find(updateVec[i]) == ruleDict.end()) {
+            corVec.push_back(updateVec[i]);
+            continue;
+        }
+
+        int curPos = i;
+        for (auto &ruleVal: ruleDict.at(updateVec[i])) {
+            if (updateDict.find(ruleVal) == updateDict.end()) {
+                continue;
+            }
+
+            if (updateDict[ruleVal] < curPos) {
+                curPos = updateDict[ruleVal];
+            }
+        }
+
+        corVec.insert(corVec.begin() + curPos, updateVec[i]);
+
+        for (int i = curPos; i < corVec.size(); i++) {
+            updateDict[corVec[i]]  = i;
+        }
+    }
+
+    return corVec[corVec.size() / 2];
+}
+
+int getUpdateNum(const map<int, vector<int>> &ruleDict, const vector<vector<int>> &updateVec, int &incRes) {
     int res = 0;
 
     for (auto &vec: updateVec) {
         bool valid = true;
+        bool vecInvalidated = false;
         set<int> updateVals;
         for (auto &val: vec) {
             if (ruleDict.find(val) != ruleDict.end()) {
                 for (auto &ruleVal: ruleDict.at(val)) {
                     if (updateVals.find(ruleVal) != updateVals.end()) {
                         valid = false;
+                        if (!vecInvalidated) {
+                            incRes += reorderIncUpdate(ruleDict, vec);
+                            vecInvalidated = true;
+                        }
                         break;
                     }
                 }
@@ -82,12 +122,13 @@ int getUpdateNum(const map<int, vector<int>> &ruleDict, const vector<vector<int>
 
 int main() {
     int res = 0;
+    int incRes = 0;
     map<int, vector<int>> ruleDict = getRuleDict();
     vector<vector<int>> updateVec = getUpdateVector();
 
-    res = getUpdateNum(ruleDict, updateVec);
+    res = getUpdateNum(ruleDict, updateVec, incRes);
 
-    cout << "Update result is: " << res << endl;
+    cout << "Update result is: " << incRes << endl;
 
     return 0;
 }
